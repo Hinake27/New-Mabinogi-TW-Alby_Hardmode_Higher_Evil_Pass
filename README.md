@@ -2,6 +2,8 @@
 
 這是一個用於計算遊戲中艾菲通行證與手紡車鑰匙製作成本的網頁工具。
 
+https://hinake27.github.io/New-Mabinogi-TW-Alby_Hardmode_Higher_Evil_Pass/
+
 ## 功能特點
 
 ### 通行證計算
