@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艾菲通行證與手紡車鑰匙計算工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #1a1a1a;
+            font-family: "Microsoft JhengHei", sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container { max-width: 1200px; width: 100%; margin: auto; }
+
+        .base-window {
+            background: rgba(14, 42, 63, 0.95);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: #1c4565;
+            padding: 10px;
+            border: 1px solid #436279;
+            border-radius: 3px;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: clamp(16px, 2vw, 24px);
+            font-weight: 700;
+            text-shadow: 0 0 5px #4a9eff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            background: rgba(20, 55, 82, 0.8);
+            border: 1px solid #436279;
+            border-radius: 3px;
+        }
+
+        .grid-item {
+            background: rgba(67, 98, 121, 0.3);
+            border: 1px solid #436279;
+            padding: 15px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            max-width: 200px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #436279;
+            color: #fff;
+            text-align: center;
+            font-size: clamp(16px, 1.5vw, 18px);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #6a8ca8;
+            box-shadow: 0 0 5px #4a9eff;
+        }
+
+        .label {
+            font-size: clamp(12px, 1.5vw, 16px);
+            color: #8aabcb;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: clamp(16px, 2vw, 20px);
+            color: #fff;
+            text-shadow: 0 0 4px #4a9eff;
+        }
+
+        .result {
+            padding: 15px;
+            background: rgba(20, 55, 82, 0.8);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            margin-top: 15px;
+        }
+
+        .total {
+            font-size: clamp(24px, 3vw, 32px);
+            color: #4a9eff;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #436279;
+            border-radius: 5px;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        .grand-total {
+            background: linear-gradient(to right, #1c4565, #0e2a3f);
+            border: 2px solid #4a9eff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(74, 158, 255, 0.3);
+            font-size: clamp(32px, 4vw, 48px);
+            color: #4a9eff;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            50% { 
+                transform: scale(1.05);
+                text-shadow: 0 0 20px #4a9eff;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .grid { grid-template-columns: 1fr; }
+            input { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="base-window">
+            <div class="header">艾菲高級困難通行證計算</div>
+            <div class="grid">
+                <div class="grid-item">
+                    <div class="label">不完整艾菲地下城通行證價格</div>
+                    <input type="number" id="passPrice" value="0" oninput="calc()">
+                </div>
+                <div class="grid-item">
+                    <div class="label">復原的秘藥價格（固定）</div>
+                    <input type="number" value="50000" disabled>
+                </div>
+                <div class="grid-item">
+                    <div class="label">需要製作通行證數量</div>
+                    <input type="number" id="passQuantity" value="1" min="1" oninput="calc()">
+                </div>
+            </div>
+            <div id="passResult" class="result"></div>
+        </div>
+
+        <div class="base-window">
+            <div class="header">手紡車鑰匙計算</div>
+            <div class="grid">
+                <div class="grid-item">
+                    <div class="label">幼蟲蠶繭單價</div>
+                    <input type="number" id="cocoonPrice" value="0" oninput="calc()">
+                </div>
+                <div class="grid-item">
+                    <div class="label">需要製作鑰匙數量</div>
+                    <input type="number" id="keyQuantity" value="1" min="1" oninput="calc()">
+                </div>
+            </div>
+            <div id="keyResult" class="result"></div>
+        </div>
+
+        <div class="grand-total" id="grandTotal"></div>
+    </div>
+
+    <script>
+        function calc() {
+            // 通行證計算
+            const passPrice = +document.getElementById('passPrice').value || 0;
+            const passQty = +document.getElementById('passQuantity').value || 1;
+            const potionPrice = 50000;
+            const potionNeeded = 3;
+            const passCost = passPrice * passQty;
+            const potionCost = potionPrice * potionNeeded * passQty;
+            const passTotal = passCost + potionCost;
+
+            // 鑰匙計算
+            const cocoonPrice = +document.getElementById('cocoonPrice').value || 0;
+            const keyQty = +document.getElementById('keyQuantity').value || 1;
+            const cocoonNeeded = 5;
+            const keyTotal = cocoonPrice * cocoonNeeded * keyQty;
+
+            // 更新顯示
+            document.getElementById('passResult').innerHTML = `
+                <div class="value">材料需求：通行證 × ${passQty} | 秘藥 × ${potionNeeded * passQty}</div>
+                <div class="value">通行證：${passCost.toLocaleString()} | 秘藥：${potionCost.toLocaleString()}</div>
+                <div class="total">總成本：${passTotal.toLocaleString()} 瑪幣</div>
+                <div class="label">平均：${Math.round(passTotal/passQty).toLocaleString()} 瑪幣/張</div>
+            `;
+
+            document.getElementById('keyResult').innerHTML = `
+                <div class="value">材料需求：蠶繭 × ${cocoonNeeded * keyQty}</div>
+                <div class="total">總成本：${keyTotal.toLocaleString()} 瑪幣</div>
+                <div class="label">平均：${Math.round(keyTotal/keyQty).toLocaleString()} 瑪幣/把</div>
+            `;
+
+            document.getElementById('grandTotal').innerHTML = `
+                總成本：${(passTotal + keyTotal).toLocaleString()} 瑪幣<br>
+                <div style="font-size:0.4em;margin-top:10px">
+                    (通行證：${passTotal.toLocaleString()} + 鑰匙：${keyTotal.toLocaleString()})
+                </div>
+            `;
+        }
+
+        calc(); // 初始計算
+    </script>
+</body>
+</html>
